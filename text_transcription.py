@@ -7,7 +7,7 @@ import os
 import time
 import requests
 import urllib
-from json_paser import parse
+from json_paser import parse, read_json
 
 lfasr_host = 'https://raasr.xfyun.cn/v2/api'
 # 请求的接口名
@@ -37,7 +37,7 @@ class RequestApi(object):
         return signa
 
     def upload(self):
-        print("上传部分：")
+        # print("上传部分：")
         upload_file_path = self.upload_file_path
         file_len = os.path.getsize(upload_file_path)
         file_name = os.path.basename(upload_file_path)
@@ -49,19 +49,29 @@ class RequestApi(object):
         param_dict["fileSize"] = file_len
         param_dict["fileName"] = file_name
         param_dict["duration"] = "200"
-        print("upload参数：", param_dict)
+        # print("[debug] upload参数：", param_dict)
         data = open(upload_file_path, 'rb').read(file_len)
 
         url = lfasr_host + api_upload + "?" + urllib.parse.urlencode(param_dict)
         response = requests.post(url=url, headers={"Content-type": "application/json"}, data=data)
 
-        print("upload_url:", url)
+        # print("upload_url:", url)
         result = json.loads(response.text)
-        print("upload resp:", result)
+        # print("[debug] upload resp:", result)
         return result
 
-    def get_result(self):
+    def get_result(self) -> str:
+        print("[info] upload start!")
         uploadresp = self.upload()
+
+        # 检测是否正常上传
+        if uploadresp["code"] != '000000':
+            print("[error] upload fail: ", uploadresp["descInfo"])
+            return ""
+
+        print("[info] upload success!")
+        print("[info] transcript start!")
+
         orderId = uploadresp['content']['orderId']
         param_dict = {}
         param_dict['appId'] = self.appid
@@ -69,9 +79,10 @@ class RequestApi(object):
         param_dict['ts'] = self.ts
         param_dict['orderId'] = orderId
         param_dict['resultType'] = "transfer,predict"
-        print("")
-        print("查询部分：")
-        print("get result参数：", param_dict)
+        # print("")
+        # print("查询部分：")
+        # print("get result参数：", param_dict)
+
         status = 3
         # 建议使用回调的方式查询结果，查询接口有请求频率限制
         while status == 3:
@@ -80,40 +91,44 @@ class RequestApi(object):
             # print("get_result_url:",response.request.url)
             result = json.loads(response.text)
             status = result['content']['orderInfo']['status']
-            print("status=", status)
+            # print("status=", status)
             if status == 4:
                 break
             time.sleep(5)
-        print("get_result resp:", result)
+        # print("[debug] get_result resp:", result)
+        print("[info] transcript success!")
 
-        return result
+        return result["content"]["orderResult"]
 
 
 def print_result(result: dict):
     text = parse(result["content"]["orderResult"])
     print("Result: ", text)
 
+
 # 读取配置文件
 def read_config():
     config_path = "config.json"
-    config_json = json.loads(config_path)
+
+    config_json = read_json(config_path)
 
     return {
         "appid": config_json["appid"],
         "secret_key": config_json["secret_key"]
     }
 
-# 输入讯飞开放平台的appid，secret_key和待转写的文件路径
-if __name__ == '__main__':
-    # file_path = "output/sound/2.wav"
-    file_path = "output/sound/2.wav"
 
+# 输入讯飞开放平台的appid，secret_key和待转写的文件路径
+def transcript(file_path: str):
+    # file_path = "output/sound/2.wav"
     config = read_config()
 
     api = RequestApi(appid=config["appid"],
                      secret_key=config["secret_key"],
                      upload_file_path=file_path)
 
-    result_json = api.get_result()
-    print_result(result_json)
+    # 返回订单结果的JSON
+    order_result = api.get_result()
+    # print_result(order_result)
+    return order_result
 
