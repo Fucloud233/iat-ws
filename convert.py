@@ -6,12 +6,11 @@ __author__ = 'wangshaowei'
 
 import argparse
 import os
-
 import subprocess
 from datetime import datetime
 
 
-def ffmpeg(src_path, dst_path):
+def ffmpeg(src_path, dst_path, output_format):
     """
     调用ffmpeg命令，执行转换过程(比特率一般为128kbps、196kbps；要求不高的话，可以使用32kbps，减小体积)
     注意：比特率的单位为bps
@@ -21,14 +20,15 @@ def ffmpeg(src_path, dst_path):
     """
     # 科大讯飞语音格式说明
     # https://www.xfyun.cn/doc/asr/voicedictation/Audio.html#%E9%9F%B3%E9%A2%91%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E8%BD%AC%E6%8D%A2%E5%B7%A5%E5%85%B7ffmpeg
+    # [important] 注意输出文件路径
+    # command = "ffmpeg -y -i {} -acodec pcm_s16le -f s16le -ac 1 -ar 16000 {}".format(src_path, dst_path)
+    command = "ffmpeg -y -i {} -f {} -vn {}".format(src_path, output_format, dst_path)
 
-    command = "ffmpeg -y -i {} -acodec pcm_s16le -f s16le -ac 1 -ar 16000 {}".format(src_path, dst_path)
-    # command = "ffmpeg -i '{}' -vn -ar 44100 -ac 2 -ab 32k -f mp3 '{}'".format(src_path, dst_path)
     try:
         subprocess.check_call(command, shell=True)
         is_success = True
     except subprocess.CalledProcessError as e:
-        print("[debug] Fail!")
+        print("[debug] Fail!", repr(e))
         print("error code: {}! shell command: {}".format(e.returncode, e.cmd))
         is_success = False
     return is_success
@@ -75,7 +75,7 @@ def convert_dir(dir_path, output_dir, is_traverse=False):
     return success_num, fail_num
 
 
-def convert_file(file_path, output_dir):
+def convert_file(file_path, output_dir, output_format):
     """
     转换单个视频文件
     :param file_path: 输入视频文件路径
@@ -86,9 +86,11 @@ def convert_file(file_path, output_dir):
         os.makedirs(output_dir)
     video_file_name = os.path.basename(file_path)
     name_body = video_file_name.rsplit(".", 1)[0]
-    audio_name = name_body + ".pcm"
+
+    audio_name = name_body + "." + output_format
     dst_path = os.path.join(output_dir, audio_name)
-    return ffmpeg(file_path, dst_path)
+
+    return ffmpeg(file_path, dst_path, output_format)
 
 
 def parse_arg():
@@ -103,7 +105,7 @@ def parse_arg():
 
 
 def main():
-    """主入口"""
+    # """主入口"""
     try:
         # 检测ffmpeg是否已安装
         result = subprocess.check_output("ffmpeg -version", shell=True)
@@ -112,10 +114,17 @@ def main():
         print("ffmpeg未安装，请先安装:ffmpeg")
         return
 
-    # 解析输入参数
-    command_param = parse_arg()
-    file_path = command_param.file_path
-    output_dir = command_param.output_dir
+    #
+    # # 解析输入参数
+    # command_param = parse_arg()
+    # file_path = command_param.file_path
+    # output_dir = command_param.output_dir
+
+    # 记录参数
+    file_path = 'output/2.flv'
+    output_dir = "output/sound"
+    traverse = False
+    output_format = 'wav'
 
     start_time = datetime.now()
     success_num = 0  # 转换成功的文件数
@@ -123,7 +132,7 @@ def main():
     if os.path.isfile(file_path):  # 文件
         if not output_dir:
             output_dir = os.path.dirname(file_path)  # 与输入文件同级目录
-        result = convert_file(file_path, output_dir)
+        result = convert_file(file_path, output_dir, output_format)
         if result:
             success_num += 1
         else:
@@ -132,7 +141,7 @@ def main():
         if not output_dir:
             output_dir = file_path  # 使用输入目录
         success_num, fail_num = convert_dir(file_path, output_dir,
-                                            is_traverse=command_param.traverse)
+                                            is_traverse=traverse)
     else:
         assert False, "file_path 不存在：'{}'".format(file_path)
 
