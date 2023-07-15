@@ -171,7 +171,7 @@ def on_open(ws):
 
 if __name__ == "__main__":
     # audio_path = 'sound/iat_pcm_16k.pcm'
-    audio_path = "video/2.pcm"
+    audio_path = "data/2.pcm"
 
     # 测试时候在此处正确填写相关信息即可运行
     time1 = datetime.now()

@@ -7,6 +7,7 @@ import os
 import time
 import requests
 import urllib
+from json_paser import parse
 
 lfasr_host = 'https://raasr.xfyun.cn/v2/api'
 # 请求的接口名
@@ -35,7 +36,6 @@ class RequestApi(object):
         signa = str(signa, 'utf-8')
         return signa
 
-
     def upload(self):
         print("上传部分：")
         upload_file_path = self.upload_file_path
@@ -52,13 +52,13 @@ class RequestApi(object):
         print("upload参数：", param_dict)
         data = open(upload_file_path, 'rb').read(file_len)
 
-        response = requests.post(url =lfasr_host + api_upload+"?"+urllib.parse.urlencode(param_dict),
-                                headers = {"Content-type":"application/json"},data=data)
-        print("upload_url:",response.request.url)
+        url = lfasr_host + api_upload + "?" + urllib.parse.urlencode(param_dict)
+        response = requests.post(url=url, headers={"Content-type": "application/json"}, data=data)
+
+        print("upload_url:", url)
         result = json.loads(response.text)
         print("upload resp:", result)
         return result
-
 
     def get_result(self):
         uploadresp = self.upload()
@@ -79,21 +79,41 @@ class RequestApi(object):
                                      headers={"Content-type": "application/json"})
             # print("get_result_url:",response.request.url)
             result = json.loads(response.text)
-            print(result)
             status = result['content']['orderInfo']['status']
-            print("status=",status)
+            print("status=", status)
             if status == 4:
                 break
             time.sleep(5)
-        print("get_result resp:",result)
+        print("get_result resp:", result)
+
         return result
 
 
+def print_result(result: dict):
+    text = parse(result["content"]["orderResult"])
+    print("Result: ", text)
+
+# 读取配置文件
+def read_config():
+    config_path = "config.json"
+    config_json = json.loads(config_path)
+
+    return {
+        "appid": config_json["appid"],
+        "secret_key": config_json["secret_key"]
+    }
 
 # 输入讯飞开放平台的appid，secret_key和待转写的文件路径
 if __name__ == '__main__':
-    api = RequestApi(appid="xxxxx",
-                     secret_key="xxxxx",
-                     upload_file_path=r"audio/lfasr_涉政.wav")
+    # file_path = "output/sound/2.wav"
+    file_path = "output/sound/2.wav"
 
-    api.get_result()
+    config = read_config()
+
+    api = RequestApi(appid=config["appid"],
+                     secret_key=config["secret_key"],
+                     upload_file_path=file_path)
+
+    result_json = api.get_result()
+    print_result(result_json)
+
