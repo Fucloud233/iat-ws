@@ -5,9 +5,9 @@
 # @Software : PyCharm
 
 import json
-from text_save import TextClass
 
-def read(path: str):
+
+def read_json(path: str):
     with open(path) as f:
         lines = f.readlines(-1)
 
@@ -15,12 +15,11 @@ def read(path: str):
     for line in lines:
         text += line + '\n'
 
-    return text
+    return json.loads(text)
 
 
-def get_json(json_text: str) -> list:
-    result_json = json.loads(json_text)["content"]["orderResult"]
-    lattice_list = json.loads(result_json)["lattice"]
+def get_main_json(json_text: str) -> list:
+    lattice_list = json.loads(json_text)["lattice"]
     # print(json.dumps(result_json, indent=2))
 
     words = []
@@ -40,9 +39,15 @@ def get_result_text(words: list):
     return text
 
 
-def parse(text: str):
-    result_json = get_json(text)
+# 解析转写结果中的文本
+def parse(json_text: str):
+    print("[info] parse start!")
+    # 1. 获取JSON中保存转写结果中的重要文本
+    result_json = get_main_json(json_text)
+
+    # 2. 获得转写结果中的结果文本
     result_text = get_result_text(result_json)
+    print("[info] parse success!")
 
     return result_text
 
@@ -55,4 +60,3 @@ def parse(text: str):
 #     text_class = TextClass("2.txt")
 #     text_class.write(result_text)
 #     # print("Result:", result_text)
-
