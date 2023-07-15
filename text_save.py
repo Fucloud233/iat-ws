@@ -5,7 +5,7 @@ from pathlib import Path
 class TextClass:
     def __init__(self, file_name):
         self.base_path = Path("output/text")
-        self.file_name = file_name
+        self.file_name = file_name + ".md"
         self.file_path = Path.joinpath(self.base_path, self.file_name)
 
         if not self.base_path.exists():
@@ -21,4 +21,4 @@ class TextClass:
         with open(self.file_path, "w") as f:
             for text_line in texts:
                 f.write(text_line + "。\n")
-        print("[debug] write " + self.file_name + " success!")
+        print("[info] write " + self.file_name + " success!")
