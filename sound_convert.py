@@ -27,6 +27,7 @@ def ffmpeg(src_path, dst_path, output_format):
     try:
         subprocess.check_call(command, shell=True)
         is_success = True
+        print("[debug] %s -> %s" % (src_path, dst_path))
     except subprocess.CalledProcessError as e:
         print("[debug] Fail!", repr(e))
         print("error code: {}! shell command: {}".format(e.returncode, e.cmd))
@@ -34,7 +35,7 @@ def ffmpeg(src_path, dst_path, output_format):
     return is_success
 
 
-def convert_dir(dir_path, output_dir, is_traverse=False):
+def convert_dir(dir_path, output_dir, output_format, is_traverse=False):
     """
     批量转换视频文件
     :param dir_path: 输入目录路径（内含视频文件）
@@ -59,7 +60,7 @@ def convert_dir(dir_path, output_dir, is_traverse=False):
 
     for file_path in sorted(file_list):
         print("file_path:", file_path)
-        result = convert_file(file_path, output_dir)
+        result = convert_file(file_path, output_dir, output_format)
         if result:
             success_num += 1
         else:
@@ -104,7 +105,7 @@ def parse_arg():
     return parser.parse_args()
 
 
-def main():
+def convert(file_path: str):
     # """主入口"""
     try:
         # 检测ffmpeg是否已安装
@@ -121,8 +122,7 @@ def main():
     # output_dir = command_param.output_dir
 
     # 记录参数
-    file_path = 'output/2.flv'
-    output_dir = "output/sound"
+    output_dir = "output\\sound"
     traverse = False
     output_format = 'wav'
 
@@ -140,7 +140,7 @@ def main():
     elif os.path.isdir(file_path):  # 目录
         if not output_dir:
             output_dir = file_path  # 使用输入目录
-        success_num, fail_num = convert_dir(file_path, output_dir,
+        success_num, fail_num = convert_dir(file_path, output_dir, output_format,
                                             is_traverse=traverse)
     else:
         assert False, "file_path 不存在：'{}'".format(file_path)
@@ -153,4 +153,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    file_path = 'output\\video'
+    convert(file_path)
