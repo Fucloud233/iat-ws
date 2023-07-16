@@ -1,2 +1,5 @@
 .idea
-output/
+output/sound/*
+output/text/*
+output/video/*
+!output/sound/example
