@@ -3,8 +3,8 @@ from pathlib import Path
 
 
 class TextClass:
-    def __init__(self, file_name):
-        self.base_path = Path("output/text")
+    def __init__(self, file_path, file_name):
+        self.base_path = Path(file_path)
         self.file_name = file_name + ".md"
         self.file_path = Path.joinpath(self.base_path, self.file_name)
 
