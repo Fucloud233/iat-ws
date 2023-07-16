@@ -122,7 +122,7 @@ def convert(file_path: str):
     # output_dir = command_param.output_dir
 
     # 记录参数
-    output_dir = "output\\sound"
+    output_dir = "../output/sound"
     traverse = False
     output_format = 'wav'
 
@@ -153,5 +153,5 @@ def convert(file_path: str):
 
 
 if __name__ == '__main__':
-    file_path = 'output\\video'
+    file_path = '../output/video'
     convert(file_path)
