@@ -1,8 +1,7 @@
-# 视频转语音
+# 科大讯飞 语音转文字
+> kdxf sound-to-text
 
-本项目使用科大讯飞的语音转写功能，实现语音转文字功能。
-
-> https://www.xfyun.cn/doc/asr/voicedictation/API.html
+本项目使用科大讯飞的[语音转写](https://www.xfyun.cn/doc/asr/voicedictation/API.html)功能，实现语音转文字功能。
 
 ## 使用方法
 
