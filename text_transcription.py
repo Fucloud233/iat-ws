@@ -42,13 +42,15 @@ class RequestApi(object):
         file_len = os.path.getsize(upload_file_path)
         file_name = os.path.basename(upload_file_path)
 
-        param_dict = {}
-        param_dict['appId'] = self.appid
-        param_dict['signa'] = self.signa
-        param_dict['ts'] = self.ts
-        param_dict["fileSize"] = file_len
-        param_dict["fileName"] = file_name
-        param_dict["duration"] = "200"
+        # 添加领域参数 pd
+        param_dict = {'appId': self.appid,
+                      'signa': self.signa,
+                      'ts': self.ts,
+                      "fileSize": file_len,
+                      "fileName": file_name,
+                      "duration": "200",
+                      "pd": "life"}
+
         # print("[debug] upload参数：", param_dict)
         data = open(upload_file_path, 'rb').read(file_len)
 
@@ -61,7 +63,7 @@ class RequestApi(object):
         return result
 
     def get_result(self) -> str:
-        print("[info] upload start!")
+        print("[info] {} upload start!".format(self.upload_file_path))
         uploadresp = self.upload()
 
         # 检测是否正常上传
@@ -69,7 +71,7 @@ class RequestApi(object):
             print("[error] upload fail: ", uploadresp["descInfo"])
             return ""
 
-        print("[info] upload success!")
+        print("[info] {} upload success!".format(self.upload_file_path))
         print("[info] transcript start!")
 
         orderId = uploadresp['content']['orderId']
