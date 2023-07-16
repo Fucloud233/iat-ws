@@ -5,7 +5,7 @@
 # @Software : PyCharm
 
 
-from text_save import TextClass
+from text.text_save import TextClass
 
 if __name__ == '__main__':
     text_class = TextClass("../output/text/example", "example")
