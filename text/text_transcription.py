@@ -110,7 +110,7 @@ def print_result(result: dict):
 
 # 读取配置文件
 def read_config():
-    config_path = "config.json"
+    config_path = "../config.json"
 
     config_json = read_json(config_path)
 
