@@ -21,4 +21,4 @@ class TextClass:
         with open(self.file_path, "w") as f:
             for text_line in texts:
                 f.write(text_line + "。\n")
-        print("[info] write " + self.file_name + " success!")
+        print("[info] write ", self.file_path, " success!")
